@@ -38,10 +38,12 @@ The CLI tries to load `$HOME/prompts/.env` and expects:
 ```bash
 prompt <prompt_basename>
 prompt --compinit
+prompt --completion <zsh|bash>
 prompt --complete [prefix]
 ```
 
 - `--compinit` prints a zsh completion function compatible with `compinit`.
+- `--completion <zsh|bash>` prints a completion script for the selected shell.
 - `--complete [prefix]` prints matching prompt basenames (used by completion scripts).
 
 ## zsh compinit completion
@@ -50,6 +52,22 @@ Add this to your shell startup file (for example `~/.zshrc`) after `compinit` is
 
 ```bash
 eval "$(prompt --compinit)"
+```
+
+Then reload your shell.
+
+You can also use:
+
+```bash
+eval "$(prompt --completion zsh)"
+```
+
+## bash completion
+
+Add this to your shell startup file (for example `~/.bashrc`):
+
+```bash
+source <(prompt --completion bash)
 ```
 
 Then reload your shell.

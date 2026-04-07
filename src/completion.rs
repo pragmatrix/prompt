@@ -1,7 +1,7 @@
 use std::fs;
 use std::io;
 
-pub fn print_compinit_script() {
+pub fn print_zsh_compinit_script() {
     println!(
         "#compdef prompt
 _prompt() {{
@@ -11,6 +11,21 @@ _prompt() {{
 }}
 
 compdef _prompt prompt"
+    );
+}
+
+pub fn print_bash_completion_script() {
+    println!(
+        "_prompt_completion() {{
+  local cur
+  cur=\"${{COMP_WORDS[COMP_CWORD]}}\"
+
+  local suggestions
+  suggestions=$(prompt --complete \"$cur\")
+  COMPREPLY=($(compgen -W \"$suggestions\" -- \"$cur\"))
+}}
+
+complete -F _prompt_completion prompt"
     );
 }
 

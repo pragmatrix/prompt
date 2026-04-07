@@ -18,8 +18,8 @@ use dotenv::from_path;
 mod cli;
 mod completion;
 
-use cli::{CliMode, parse_cli_args};
-use completion::{list_prompt_basenames, print_compinit_script};
+use cli::{CliMode, CompletionShell, parse_cli_args};
+use completion::{list_prompt_basenames, print_bash_completion_script, print_zsh_compinit_script};
 
 #[tokio::main]
 async fn main() {
@@ -31,8 +31,11 @@ async fn main() {
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     match parse_cli_args()? {
-        CliMode::Compinit => {
-            print_compinit_script();
+        CliMode::CompletionScript { shell } => {
+            match shell {
+                CompletionShell::Zsh => print_zsh_compinit_script(),
+                CompletionShell::Bash => print_bash_completion_script(),
+            }
             Ok(())
         }
         CliMode::Complete { prefix } => {

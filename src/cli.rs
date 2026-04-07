@@ -2,8 +2,13 @@ use clap::{Arg, ArgAction, ArgGroup, Command};
 
 pub enum CliMode {
     Run { basename: String },
-    Compinit,
+    CompletionScript { shell: CompletionShell },
     Complete { prefix: String },
+}
+
+pub enum CompletionShell {
+    Zsh,
+    Bash,
 }
 
 pub fn parse_cli_args() -> Result<CliMode, clap::Error> {
@@ -21,6 +26,13 @@ pub fn parse_cli_args() -> Result<CliMode, clap::Error> {
                 .action(ArgAction::SetTrue),
         )
         .arg(
+            Arg::new("completion")
+                .long("completion")
+                .value_name("shell")
+                .help("Print a shell completion script (zsh or bash)")
+                .value_parser(["zsh", "bash"]),
+        )
+        .arg(
             Arg::new("complete")
                 .long("complete")
                 .value_name("prefix")
@@ -30,14 +42,25 @@ pub fn parse_cli_args() -> Result<CliMode, clap::Error> {
         )
         .group(
             ArgGroup::new("mode")
-                .args(["prompt_basename", "compinit", "complete"])
+                .args(["prompt_basename", "compinit", "completion", "complete"])
                 .required(true)
                 .multiple(false),
         )
         .try_get_matches()?;
 
     if matches.get_flag("compinit") {
-        return Ok(CliMode::Compinit);
+        return Ok(CliMode::CompletionScript {
+            shell: CompletionShell::Zsh,
+        });
+    }
+
+    if let Some(shell) = matches.get_one::<String>("completion") {
+        let shell = match shell.as_str() {
+            "zsh" => CompletionShell::Zsh,
+            "bash" => CompletionShell::Bash,
+            _ => unreachable!("clap value_parser enforces valid shell"),
+        };
+        return Ok(CliMode::CompletionScript { shell });
     }
 
     if let Some(prefix) = matches.get_one::<String>("complete") {
