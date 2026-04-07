@@ -2,10 +2,10 @@
 
 A small CLI that sends stdin plus a selected prompt file to OpenAI chat completions and prints the model output.
 
-## Install
+## Usage
 
 ```bash
-cargo install --path .
+prompt <prompt_basename>
 ```
 
 ## Prompt files
@@ -24,7 +24,13 @@ you can run:
 echo "some input" | prompt review
 ```
 
-The tool checks extensions in this order: `.md`, `.txt`, `.prompt`.
+`prompt` checks extensions in this order: `.md`, `.txt`, `.prompt`.
+
+## Install
+
+```bash
+cargo install --path .
+```
 
 ## Environment
 
@@ -32,12 +38,6 @@ The CLI tries to load `$HOME/prompts/.env` and expects:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_MODEL` (optional, default: `gpt-5.4`)
-
-## Usage
-
-```bash
-prompt <prompt_basename>
-```
 
 ## zsh compinit completion
 
