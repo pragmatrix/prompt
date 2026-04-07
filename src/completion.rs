@@ -1,32 +1,18 @@
 use std::fs;
 use std::io;
 
-pub fn print_zsh_compinit_script() {
-    println!(
-        "#compdef prompt
-_prompt() {{
-  local -a basenames
-  basenames=(\"${{(@f)$(prompt --complete \"$PREFIX\")}}\")
-  compadd -- $basenames
-}}
-
-compdef _prompt prompt"
-    );
+pub enum CompletionShell {
+    Zsh,
+    Bash,
 }
 
-pub fn print_bash_completion_script() {
-    println!(
-        "_prompt_completion() {{
-  local cur
-  cur=\"${{COMP_WORDS[COMP_CWORD]}}\"
-
-  local suggestions
-  suggestions=$(prompt --complete \"$cur\")
-  COMPREPLY=($(compgen -W \"$suggestions\" -- \"$cur\"))
-}}
-
-complete -F _prompt_completion prompt"
-    );
+impl CompletionShell {
+    pub fn completion_script(self) -> &'static str {
+        match self {
+            CompletionShell::Zsh => include_str!("completion/zsh_compinit.zsh"),
+            CompletionShell::Bash => include_str!("completion/bash_completion.bash"),
+        }
+    }
 }
 
 pub fn list_prompt_basenames(prefix: &str) -> Result<Vec<String>, io::Error> {

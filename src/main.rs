@@ -18,8 +18,8 @@ use dotenv::from_path;
 mod cli;
 mod completion;
 
-use cli::{CliMode, CompletionShell, parse_cli_args};
-use completion::{list_prompt_basenames, print_bash_completion_script, print_zsh_compinit_script};
+use cli::{CliMode, parse_cli_args};
+use completion::list_prompt_basenames;
 
 #[tokio::main]
 async fn main() {
@@ -32,10 +32,7 @@ async fn main() {
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     match parse_cli_args()? {
         CliMode::CompletionScript { shell } => {
-            match shell {
-                CompletionShell::Zsh => print_zsh_compinit_script(),
-                CompletionShell::Bash => print_bash_completion_script(),
-            }
+            print!("{}", shell.completion_script());
             Ok(())
         }
         CliMode::Complete { prefix } => {
@@ -44,9 +41,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
             Ok(())
         }
-        CliMode::Run { basename } => {
-            run_prompt(&basename).await
-        }
+        CliMode::Run { basename } => run_prompt(&basename).await,
     }
 }
 
@@ -64,7 +59,8 @@ async fn run_prompt(basename: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut stdin_text = String::new();
     io::stdin().read_to_string(&mut stdin_text)?;
 
-    let home = home::home_dir().ok_or_else(|| io::Error::other("Could not resolve home directory"))?;
+    let home =
+        home::home_dir().ok_or_else(|| io::Error::other("Could not resolve home directory"))?;
     let env_path = home.join("prompts").join(".env");
     if let Err(err) = from_path(&env_path) {
         eprintln!("Warning: could not load {}: {err}", env_path.display());

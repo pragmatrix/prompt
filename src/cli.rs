@@ -1,14 +1,11 @@
 use clap::{Arg, ArgAction, ArgGroup, Command};
 
+use crate::completion::CompletionShell;
+
 pub enum CliMode {
     Run { basename: String },
     CompletionScript { shell: CompletionShell },
     Complete { prefix: String },
-}
-
-pub enum CompletionShell {
-    Zsh,
-    Bash,
 }
 
 pub fn parse_cli_args() -> Result<CliMode, clap::Error> {
