@@ -1,6 +1,8 @@
 use std::fs;
 use std::io;
 
+use crate::{PROMPT_FILE_EXTENSIONS, PROMPTS_DIR_NAME};
+
 pub enum CompletionShell {
     Zsh,
     Bash,
@@ -18,7 +20,7 @@ impl CompletionShell {
 pub fn list_prompt_basenames(prefix: &str) -> Result<Vec<String>, io::Error> {
     let home =
         home::home_dir().ok_or_else(|| io::Error::other("Could not resolve home directory"))?;
-    let prompt_dir_path = home.join("prompts");
+    let prompt_dir_path = home.join(PROMPTS_DIR_NAME);
 
     let mut basenames = std::collections::BTreeSet::new();
     let entries = match fs::read_dir(&prompt_dir_path) {
@@ -46,7 +48,7 @@ pub fn list_prompt_basenames(prefix: &str) -> Result<Vec<String>, io::Error> {
             None => continue,
         };
 
-        if !matches!(ext, "md" | "txt" | "prompt") {
+        if !PROMPT_FILE_EXTENSIONS.contains(&ext) {
             continue;
         }
         if !stem.starts_with(prefix) {

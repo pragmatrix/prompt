@@ -10,13 +10,13 @@ prompt <prompt_basename>
 
 ## Prompt files
 
-Prompt files are read from `$HOME/prompts` by basename.
+Prompt files are read from `$HOME/.prompts` by basename.
 
 Given:
 
-- `$HOME/prompts/review.md`
-- `$HOME/prompts/review.txt`
-- `$HOME/prompts/review.prompt`
+- `$HOME/.prompts/review.md`
+- `$HOME/.prompts/review.txt`
+- `$HOME/.prompts/review.prompt`
 
 you can run:
 
@@ -34,7 +34,7 @@ cargo install --path .
 
 ## Environment
 
-The CLI tries to load `$HOME/prompts/.env` and expects:
+The CLI tries to load `$HOME/.prompts/.env` and expects:
 
 - `OPENAI_API_KEY` (required)
 - `OPENAI_MODEL` (optional, default: `gpt-5.4`)
@@ -77,4 +77,4 @@ Completion scripts use:
 prompt --complete [prefix]
 ```
 
-Completion suggestions are basenames of files in `$HOME/prompts` with `.md`, `.txt`, or `.prompt` extensions.
+Completion suggestions are basenames of files in `$HOME/.prompts` with `.md`, `.txt`, or `.prompt` extensions.

@@ -21,6 +21,17 @@ mod completion;
 use cli::{CliMode, parse_cli_args};
 use completion::list_prompt_basenames;
 
+pub(crate) const PROMPTS_DIR_NAME: &str = ".prompts";
+pub(crate) const PROMPT_FILE_EXTENSIONS: [&str; 3] = ["md", "txt", "prompt"];
+
+pub(crate) fn prompt_extensions_display() -> String {
+    PROMPT_FILE_EXTENSIONS
+        .iter()
+        .map(|ext| format!(".{ext}"))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 #[tokio::main]
 async fn main() {
     if let Err(err) = run().await {
@@ -61,7 +72,7 @@ async fn run_prompt(basename: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let home =
         home::home_dir().ok_or_else(|| io::Error::other("Could not resolve home directory"))?;
-    let env_path = home.join("prompts").join(".env");
+    let env_path = home.join(PROMPTS_DIR_NAME).join(".env");
     if let Err(err) = from_path(&env_path) {
         eprintln!("Warning: could not load {}: {err}", env_path.display());
     }
@@ -110,10 +121,10 @@ async fn run_prompt(basename: &str) -> Result<(), Box<dyn std::error::Error>> {
 fn read_prompt_text(basename: &str) -> Result<String, io::Error> {
     let home =
         home::home_dir().ok_or_else(|| io::Error::other("Could not resolve home directory"))?;
-    let prompt_dir_path = home.join("prompts");
+    let prompt_dir_path = home.join(PROMPTS_DIR_NAME);
     let prompt_dir = Dir::open_ambient_dir(&prompt_dir_path, ambient_authority())?;
 
-    for ext in ["md", "txt", "prompt"] {
+    for ext in PROMPT_FILE_EXTENSIONS {
         let file_name = format!("{basename}.{ext}");
         match prompt_dir.open(&file_name) {
             Ok(mut file) => {
@@ -129,8 +140,9 @@ fn read_prompt_text(basename: &str) -> Result<String, io::Error> {
     Err(io::Error::new(
         io::ErrorKind::NotFound,
         format!(
-            "No prompt file found for '{basename}' in {} with extensions .md, .txt, .prompt",
-            prompt_dir_path.display()
+            "No prompt file found for '{basename}' in {} with extensions {}",
+            prompt_dir_path.display(),
+            prompt_extensions_display()
         ),
     ))
 }

@@ -1,6 +1,7 @@
 use clap::{Arg, ArgAction, ArgGroup, Command};
 
 use crate::completion::CompletionShell;
+use crate::{PROMPTS_DIR_NAME, prompt_extensions_display};
 
 pub enum CliMode {
     Run { basename: String },
@@ -9,12 +10,17 @@ pub enum CliMode {
 }
 
 pub fn parse_cli_args() -> Result<CliMode, clap::Error> {
+    let prompt_help = format!(
+        "Basename in $HOME/{PROMPTS_DIR_NAME} to load ({})",
+        prompt_extensions_display()
+    );
+
     let matches = Command::new("prompt")
         .about("Send stdin with a prompt file to OpenAI chat completions")
         .arg(
             Arg::new("prompt_basename")
                 .value_name("prompt_basename")
-                .help("Basename in $HOME/prompts to load (.md, .txt, .prompt)"),
+                .help(prompt_help),
         )
         .arg(
             Arg::new("compinit")
