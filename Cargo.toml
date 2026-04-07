@@ -2,6 +2,7 @@
 name = "prompt"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 
 [dependencies]
 async-openai = { version = "0.34", features = ["chat-completion"] }
