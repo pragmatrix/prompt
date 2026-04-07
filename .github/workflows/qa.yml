@@ -5,8 +5,8 @@ on:
   pull_request:
 
 jobs:
-  qa:
-    name: Rust QA
+  qa-fmt:
+    name: QA / fmt
     runs-on: ubuntu-latest
 
     steps:
@@ -16,13 +16,24 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
+          components: rustfmt
 
       - name: Check formatting
         run: cargo fmt --all -- --check
 
+  qa-clippy:
+    name: QA / clippy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
       - name: Run clippy (deny warnings)
         run: cargo clippy --all-targets --all-features -- -D warnings
 
-      - name: Build
-        run: cargo build --all-targets --all-features
