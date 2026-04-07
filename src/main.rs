@@ -15,6 +15,12 @@ use async_openai::{
 use cap_std::{ambient_authority, fs::Dir};
 use dotenv::from_path;
 
+mod cli;
+mod completion;
+
+use cli::{CliMode, parse_cli_args};
+use completion::{list_prompt_basenames, print_compinit_script};
+
 #[tokio::main]
 async fn main() {
     if let Err(err) = run().await {
@@ -24,11 +30,24 @@ async fn main() {
 }
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let mut args = env::args().skip(1);
-    let basename = args.next().ok_or_else(usage)?;
-    if args.next().is_some() {
-        return Err(usage().into());
+    match parse_cli_args()? {
+        CliMode::Compinit => {
+            print_compinit_script();
+            Ok(())
+        }
+        CliMode::Complete { prefix } => {
+            for candidate in list_prompt_basenames(&prefix)? {
+                println!("{candidate}");
+            }
+            Ok(())
+        }
+        CliMode::Run { basename } => {
+            run_prompt(&basename).await
+        }
     }
+}
+
+async fn run_prompt(basename: &str) -> Result<(), Box<dyn std::error::Error>> {
     if basename.starts_with('.') {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -37,13 +56,12 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .into());
     }
 
-    let prompt_text = read_prompt_text(&basename)?;
+    let prompt_text = read_prompt_text(basename)?;
 
     let mut stdin_text = String::new();
     io::stdin().read_to_string(&mut stdin_text)?;
 
-    let home =
-        home::home_dir().ok_or_else(|| io::Error::other("Could not resolve home directory"))?;
+    let home = home::home_dir().ok_or_else(|| io::Error::other("Could not resolve home directory"))?;
     let env_path = home.join("prompts").join(".env");
     if let Err(err) = from_path(&env_path) {
         eprintln!("Warning: could not load {}: {err}", env_path.display());
@@ -88,10 +106,6 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{output}");
     Ok(())
-}
-
-fn usage() -> String {
-    "Usage: prompt <prompt_basename>".to_string()
 }
 
 fn read_prompt_text(basename: &str) -> Result<String, io::Error> {
