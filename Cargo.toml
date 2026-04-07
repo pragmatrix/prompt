@@ -1,0 +1,11 @@
+[package]
+name = "prompt"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-openai = { version = "0.34", features = ["chat-completion"] }
+cap-std = "4.0.2"
+dotenv = "0.15"
+home = "0.5"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
